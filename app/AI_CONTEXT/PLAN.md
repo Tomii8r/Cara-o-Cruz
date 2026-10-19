@@ -551,12 +551,14 @@ No agregar dependencias fuera de esta lista sin justificar en este archivo.
 
 ## 10. FASES DE IMPLEMENTACIÓN
 
-### FASE 1 — Dominio y datos
+### FASE 1 — Dominio y datos ✅ COMPLETADA
 **Archivos:** `CoinSide.kt`, `CoinFlipRepository.kt`, `FlipCoinUseCase.kt`, `RandomCoinFlipRepository.kt`.
+**Tests:** `RandomCoinFlipRepositoryTest.kt`, `FlipCoinUseCaseTest.kt`.
 **Criterios:**
-- [ ] `domain` no importa Android/Compose.
-- [ ] `Random` inyectable.
-- [ ] Compila sin dependencias nuevas.
+- [x] `domain` no importa Android/Compose.
+- [x] `Random` inyectable.
+- [x] Compila sin dependencias nuevas.
+- [x] `:app:testDebugUnitTest` exitoso.
 
 ### FASE 2 — Dependencias y ViewModel
 **Archivos:** `libs.versions.toml`, `app/build.gradle.kts`, `CoinFlipConfig.kt`, `CoinFlipUiState.kt`, `CoinFlipViewModel.kt`, `CoinFlipViewModelFactory.kt`.
