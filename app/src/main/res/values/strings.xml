@@ -6,4 +6,6 @@
     <string name="action_flip">Tirar la moneda</string>
     <string name="action_flipping">Girando...</string>
     <string name="action_flip_again">Volver a tirar</string>
+    <string name="cd_coin_cara">Moneda mostrando cara</string>
+    <string name="cd_coin_cruz">Moneda mostrando cruz</string>
 </resources>

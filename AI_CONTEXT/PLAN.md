@@ -28,6 +28,7 @@ Leer `AI_CONTEXT/AI_RULES.md` antes de tocar código. Resumen:
 - Sin Hilt, Koin, Room, Retrofit ni librerías de terceros.
 - `StateFlow` en el ViewModel, `viewModel()` estándar en Compose.
 - State hoisting en los composables.
+- Nombres de composables y componentes siguiendo convenciones de Material 3.
 - KISS: código directo, sin abstracciones innecesarias.
 - Animaciones fluidas + hápticos + sonido (pendientes de implementar).
 

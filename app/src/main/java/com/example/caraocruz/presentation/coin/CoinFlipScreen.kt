@@ -1,17 +1,24 @@
 package com.example.caraocruz.presentation.coin
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +35,7 @@ fun CoinFlipScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -37,7 +45,24 @@ fun CoinFlipScreen(
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            val coinSize = minOf(maxWidth * 0.55f, 220.dp)
+            val side = uiState.visibleSide()
+            Image(
+                painter = painterResource(
+                    if (side == CoinSide.CARA) R.drawable.coin_cara else R.drawable.coin_cruz
+                ),
+                contentDescription = stringResource(
+                    if (side == CoinSide.CARA) R.string.cd_coin_cara else R.string.cd_coin_cruz
+                ),
+                modifier = Modifier.size(coinSize)
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = resultText(uiState),
             style = MaterialTheme.typography.titleLarge,
@@ -51,6 +76,12 @@ fun CoinFlipScreen(
             Text(text = buttonText(uiState))
         }
     }
+}
+
+private fun CoinFlipUiState.visibleSide(): CoinSide = when (this) {
+    CoinFlipUiState.Idle -> CoinSide.CARA
+    is CoinFlipUiState.Flipping -> target
+    is CoinFlipUiState.Result -> side
 }
 
 @Composable
