@@ -1,6 +1,9 @@
 package com.example.caraocruz.presentation.coin
 
-import com.example.caraocruz.domain.model.CoinSide
+enum class CoinSide {
+    CARA,
+    CRUZ
+}
 
 sealed interface CoinFlipUiState {
     data object Idle : CoinFlipUiState

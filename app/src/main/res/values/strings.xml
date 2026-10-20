@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Cara o Cruz</string>
+    <string name="title_question">¿Qué dice el destino?</string>
+    <string name="result_cara">Cara</string>
+    <string name="result_cruz">Cruz</string>
+    <string name="action_flip">Tirar la moneda</string>
+    <string name="action_flipping">Girando...</string>
+    <string name="action_flip_again">Volver a tirar</string>
 </resources>
