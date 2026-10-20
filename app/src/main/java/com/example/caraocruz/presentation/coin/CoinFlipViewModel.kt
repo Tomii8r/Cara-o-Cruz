@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-const val FLIP_DURATION_MS = 1500L
+const val FLIP_DURATION_MS = 1200L
 
 class CoinFlipViewModel : ViewModel() {
 

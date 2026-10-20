@@ -1,5 +1,8 @@
 package com.example.caraocruz.presentation.coin
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,11 +23,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -62,22 +69,10 @@ fun CoinFlipScreen(
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(16.dp))
-            BoxWithConstraints(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                val coinSize = minOf(maxWidth * 0.55f, 220.dp)
-                val side = uiState.visibleSide()
-                Image(
-                    painter = painterResource(
-                        if (side == CoinSide.CARA) R.drawable.coin_cara else R.drawable.coin_cruz
-                    ),
-                    contentDescription = stringResource(
-                        if (side == CoinSide.CARA) R.string.cd_coin_cara else R.string.cd_coin_cruz
-                    ),
-                    modifier = Modifier.size(coinSize)
-                )
-            }
+            CoinView(
+                uiState = uiState,
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = resultText(uiState),
@@ -139,10 +134,69 @@ private fun GradientBackground(modifier: Modifier = Modifier) {
     }
 }
 
-private fun CoinFlipUiState.visibleSide(): CoinSide = when (this) {
-    CoinFlipUiState.Idle -> CoinSide.CARA
-    is CoinFlipUiState.Flipping -> target
-    is CoinFlipUiState.Result -> side
+private const val FLIP_FULL_TURNS = 4
+
+@Composable
+private fun CoinView(
+    uiState: CoinFlipUiState,
+    modifier: Modifier = Modifier
+) {
+    BoxWithConstraints(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        val coinSize = minOf(maxWidth * 0.55f, 220.dp)
+        val density = LocalDensity.current.density
+        val initialAngle = if (uiState is CoinFlipUiState.Result && uiState.side == CoinSide.CRUZ) {
+            180f
+        } else {
+            0f
+        }
+        val rotation = remember { Animatable(initialAngle) }
+        val flipId = when (val state = uiState) {
+            CoinFlipUiState.Idle -> 0
+            is CoinFlipUiState.Flipping -> state.flipId
+            is CoinFlipUiState.Result -> state.flipId
+        }
+
+        LaunchedEffect(flipId) {
+            val state = uiState
+            if (state is CoinFlipUiState.Flipping) {
+                val currentAngle = rotation.value
+                val currentMod = ((currentAngle % 360f) + 360f) % 360f
+                val targetMod = if (state.target == CoinSide.CARA) 0f else 180f
+                val delta = (targetMod - currentMod + 360f) % 360f
+                rotation.animateTo(
+                    targetValue = currentAngle + 360f * FLIP_FULL_TURNS + delta,
+                    animationSpec = tween(
+                        durationMillis = FLIP_DURATION_MS.toInt(),
+                        easing = LinearEasing
+                    )
+                )
+            }
+        }
+
+        val angle = rotation.value
+        val normalized = ((angle % 360f) + 360f) % 360f
+        val showCara = normalized < 90f || normalized > 270f
+        val side = if (showCara) CoinSide.CARA else CoinSide.CRUZ
+        val faceAngle = if (showCara) angle else angle + 180f
+
+        Image(
+            painter = painterResource(
+                if (side == CoinSide.CARA) R.drawable.coin_cara else R.drawable.coin_cruz
+            ),
+            contentDescription = stringResource(
+                if (side == CoinSide.CARA) R.string.cd_coin_cara else R.string.cd_coin_cruz
+            ),
+            modifier = Modifier
+                .size(coinSize)
+                .graphicsLayer {
+                    rotationY = faceAngle
+                    cameraDistance = 12f * density
+                }
+        )
+    }
 }
 
 @Composable
