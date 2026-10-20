@@ -18,8 +18,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +54,7 @@ import com.example.caraocruz.ui.theme.PeachGlow
 fun CoinFlipScreen(
     uiState: CoinFlipUiState,
     onFlipClick: () -> Unit,
+    onSettingsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -87,6 +93,25 @@ fun CoinFlipScreen(
             ) {
                 Text(text = buttonText(uiState))
             }
+        }
+        IconButton(
+            onClick = onSettingsClick,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .safeDrawingPadding()
+                .padding(top = 8.dp, end = 16.dp)
+                .size(44.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CircleShape
+                )
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = stringResource(R.string.cd_settings),
+                tint = Color.White,
+                modifier = Modifier.size(22.dp)
+            )
         }
     }
 }
@@ -145,7 +170,7 @@ private fun CoinView(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        val coinSize = minOf(maxWidth * 0.55f, 220.dp)
+        val coinSize = minOf(maxWidth * 0.60f, 235.dp)
         val density = LocalDensity.current.density
         val initialAngle = if (uiState is CoinFlipUiState.Result && uiState.side == CoinSide.CRUZ) {
             180f
