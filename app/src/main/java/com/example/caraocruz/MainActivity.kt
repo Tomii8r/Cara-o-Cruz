@@ -34,12 +34,15 @@ class MainActivity : ComponentActivity() {
                 val viewModel: CoinFlipViewModel = viewModel()
                 val uiState by viewModel.uiState.collectAsState()
                 var showSettings by rememberSaveable { mutableStateOf(false) }
+                var isDarkMode by rememberSaveable { mutableStateOf(false) }
                 CoinFlipScreen(
                     uiState = uiState,
                     onFlipClick = viewModel::flipCoin,
                     showSettings = showSettings,
+                    isDarkMode = isDarkMode,
                     onSettingsClick = { showSettings = true },
-                    onDismissSettings = { showSettings = false }
+                    onDismissSettings = { showSettings = false },
+                    onDarkModeChange = { isDarkMode = it }
                 )
             }
         }

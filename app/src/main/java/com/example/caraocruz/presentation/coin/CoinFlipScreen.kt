@@ -2,10 +2,12 @@ package com.example.caraocruz.presentation.coin
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,10 +17,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -26,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,16 +38,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,8 +69,10 @@ fun CoinFlipScreen(
     uiState: CoinFlipUiState,
     onFlipClick: () -> Unit,
     showSettings: Boolean = false,
+    isDarkMode: Boolean = false,
     onSettingsClick: () -> Unit = {},
     onDismissSettings: () -> Unit = {},
+    onDarkModeChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -122,36 +133,127 @@ fun CoinFlipScreen(
         }
     }
     if (showSettings) {
-        SettingsDialog(onDismiss = onDismissSettings)
+        SettingsDialog(
+            isDarkMode = isDarkMode,
+            onDarkModeChange = onDarkModeChange,
+            onDismiss = onDismissSettings
+        )
     }
 }
 
+private val SwitchDark = Color(0xFF28292C)
+private val SwitchLight = Color(0xFFD8DBE0)
+
 @Composable
-private fun SettingsDialog(onDismiss: () -> Unit) {
+private fun SettingsDialog(
+    isDarkMode: Boolean,
+    onDarkModeChange: (Boolean) -> Unit,
+    onDismiss: () -> Unit
+) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surface,
             shadowElevation = 12.dp
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 24.dp, top = 20.dp, end = 12.dp, bottom = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.settings_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
-                )
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.cd_close),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 24.dp, top = 20.dp, end = 12.dp, bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.settings_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
                     )
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = stringResource(R.string.cd_close),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .toggleable(
+                            value = isDarkMode,
+                            onValueChange = onDarkModeChange,
+                            role = Role.Switch
+                        )
+                        .padding(horizontal = 24.dp, vertical = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.settings_mode),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = stringResource(
+                                if (isDarkMode) {
+                                    R.string.settings_mode_dark
+                                } else {
+                                    R.string.settings_mode_light
+                                }
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    ModeSwitch(checked = isDarkMode)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModeSwitch(checked: Boolean) {
+    val progress by animateFloatAsState(
+        targetValue = if (checked) 1f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "modeSwitch"
+    )
+    val trackColor = lerp(SwitchDark, SwitchLight, progress)
+    val knobOffset = 32.dp * progress
+    val crescentAlpha = 1f - progress
+
+    Box(
+        modifier = Modifier.size(width = 64.dp, height = 48.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(width = 64.dp, height = 32.dp)
+                .clip(CircleShape)
+                .background(trackColor)
+                .border(2.dp, SwitchDark, CircleShape)
+                .padding(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .offset(x = knobOffset)
+                    .size(16.dp)
+                    .clip(CircleShape)
+            ) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    drawCircle(SwitchDark)
+                    if (crescentAlpha > 0f) {
+                        drawCircle(
+                            color = SwitchLight.copy(alpha = crescentAlpha),
+                            radius = size.minDimension * 0.55f,
+                            center = Offset(size.width * 0.72f, size.height * 0.28f)
+                        )
+                    }
                 }
             }
         }
@@ -324,6 +426,19 @@ private fun CoinFlipScreenSettingsPreview() {
             uiState = CoinFlipUiState.Result(CoinSide.CARA, 1),
             onFlipClick = {},
             showSettings = true
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CoinFlipScreenSettingsDarkPreview() {
+    CaraOCruzTheme {
+        CoinFlipScreen(
+            uiState = CoinFlipUiState.Result(CoinSide.CARA, 1),
+            onFlipClick = {},
+            showSettings = true,
+            isDarkMode = true
         )
     }
 }
