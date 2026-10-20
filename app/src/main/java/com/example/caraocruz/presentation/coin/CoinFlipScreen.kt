@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,13 +20,16 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.example.caraocruz.R
 import com.example.caraocruz.ui.theme.BackgroundBottom
 import com.example.caraocruz.ui.theme.BackgroundMiddle
@@ -54,7 +59,9 @@ import com.example.caraocruz.ui.theme.PeachGlow
 fun CoinFlipScreen(
     uiState: CoinFlipUiState,
     onFlipClick: () -> Unit,
+    showSettings: Boolean = false,
     onSettingsClick: () -> Unit = {},
+    onDismissSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -112,6 +119,41 @@ fun CoinFlipScreen(
                 tint = Color.White,
                 modifier = Modifier.size(22.dp)
             )
+        }
+    }
+    if (showSettings) {
+        SettingsDialog(onDismiss = onDismissSettings)
+    }
+}
+
+@Composable
+private fun SettingsDialog(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 12.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, top = 20.dp, end = 12.dp, bottom = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.cd_close),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
@@ -270,6 +312,18 @@ private fun CoinFlipScreenResultPreview() {
         CoinFlipScreen(
             uiState = CoinFlipUiState.Result(CoinSide.CRUZ, 1),
             onFlipClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CoinFlipScreenSettingsPreview() {
+    CaraOCruzTheme {
+        CoinFlipScreen(
+            uiState = CoinFlipUiState.Result(CoinSide.CARA, 1),
+            onFlipClick = {},
+            showSettings = true
         )
     }
 }

@@ -8,6 +8,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.caraocruz.presentation.coin.CoinFlipScreen
 import com.example.caraocruz.presentation.coin.CoinFlipViewModel
@@ -30,9 +33,13 @@ class MainActivity : ComponentActivity() {
             CaraOCruzTheme {
                 val viewModel: CoinFlipViewModel = viewModel()
                 val uiState by viewModel.uiState.collectAsState()
+                var showSettings by rememberSaveable { mutableStateOf(false) }
                 CoinFlipScreen(
                     uiState = uiState,
-                    onFlipClick = viewModel::flipCoin
+                    onFlipClick = viewModel::flipCoin,
+                    showSettings = showSettings,
+                    onSettingsClick = { showSettings = true },
+                    onDismissSettings = { showSettings = false }
                 )
             }
         }
