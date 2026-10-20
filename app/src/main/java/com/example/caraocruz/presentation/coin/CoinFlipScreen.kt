@@ -223,9 +223,9 @@ private fun ModeSwitch(checked: Boolean) {
         animationSpec = tween(durationMillis = 300),
         label = "modeSwitch"
     )
-    val trackColor = lerp(SwitchDark, SwitchLight, progress)
-    val knobOffset = 32.dp * progress
-    val crescentAlpha = 1f - progress
+    val trackColor = lerp(SwitchLight, SwitchDark, progress)
+    val knobOffset = 32.dp * (1f - progress)
+    val crescentAlpha = progress
 
     Box(
         modifier = Modifier.size(width = 64.dp, height = 48.dp),
