@@ -520,7 +520,7 @@ Añadir (sin borrar `app_name`):
 
 ## 9. DEPENDENCIAS
 
-Modificar `gradle/libs.versions.toml`:
+Modificar `../gradle/libs.versions.toml`:
 
 ```toml
 [versions]
@@ -535,7 +535,7 @@ androidx-compose-foundation = { group = "androidx.compose.foundation", name = "f
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 ```
 
-Modificar `app/build.gradle.kts`:
+Modificar `../app/build.gradle.kts`:
 
 ```kotlin
 implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -561,7 +561,7 @@ No agregar dependencias fuera de esta lista sin justificar en este archivo.
 - [x] `:app:testDebugUnitTest` exitoso.
 
 ### FASE 2 — Dependencias y ViewModel
-**Archivos:** `libs.versions.toml`, `app/build.gradle.kts`, `CoinFlipConfig.kt`, `CoinFlipUiState.kt`, `CoinFlipViewModel.kt`, `CoinFlipViewModelFactory.kt`.
+**Archivos:** `libs.versions.toml`, `../app/build.gradle.kts`, `CoinFlipConfig.kt`, `CoinFlipUiState.kt`, `CoinFlipViewModel.kt`, `CoinFlipViewModelFactory.kt`.
 **Criterios:**
 - [ ] `uiState` es `StateFlow`.
 - [ ] `flipCoin()` ignora taps durante `Flipping`.
