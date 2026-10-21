@@ -326,7 +326,7 @@ private fun CoinView(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        val coinSize = minOf(maxWidth * 0.60f, 235.dp)
+        val coinSize = minOf(maxWidth * 0.72f, 282.dp)
         val density = LocalDensity.current.density
         val initialAngle = if (uiState is CoinFlipUiState.Result && uiState.side == CoinSide.CRUZ) {
             180f
