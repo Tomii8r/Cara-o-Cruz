@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -61,6 +62,10 @@ import com.example.caraocruz.ui.theme.BackgroundBottom
 import com.example.caraocruz.ui.theme.BackgroundMiddle
 import com.example.caraocruz.ui.theme.BackgroundTop
 import com.example.caraocruz.ui.theme.CaraOCruzTheme
+import com.example.caraocruz.ui.theme.DarkBackground
+import com.example.caraocruz.ui.theme.DarkGlow
+import com.example.caraocruz.ui.theme.DarkPrimary
+import com.example.caraocruz.ui.theme.DarkSurface
 import com.example.caraocruz.ui.theme.LilacGlow
 import com.example.caraocruz.ui.theme.PeachGlow
 
@@ -76,7 +81,7 @@ fun CoinFlipScreen(
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        GradientBackground()
+        GradientBackground(isDarkMode = isDarkMode)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -95,6 +100,7 @@ fun CoinFlipScreen(
             Spacer(modifier = Modifier.height(16.dp))
             CoinView(
                 uiState = uiState,
+                isDarkMode = isDarkMode,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -127,7 +133,7 @@ fun CoinFlipScreen(
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = stringResource(R.string.cd_settings),
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(22.dp)
             )
         }
@@ -261,26 +267,31 @@ private fun ModeSwitch(checked: Boolean) {
 }
 
 @Composable
-private fun GradientBackground(modifier: Modifier = Modifier) {
+private fun GradientBackground(
+    isDarkMode: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val backgrounds = if (isDarkMode) {
+        listOf(DarkBackground, DarkBackground, DarkSurface)
+    } else {
+        listOf(BackgroundTop, BackgroundMiddle, BackgroundBottom)
+    }
+    val lilac = if (isDarkMode) DarkGlow else LilacGlow
+    val peach = if (isDarkMode) DarkPrimary else PeachGlow
+    val lilacAlpha = if (isDarkMode) 0.18f else 0.55f
+    val peachAlpha = if (isDarkMode) 0.12f else 0.4f
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        BackgroundTop,
-                        BackgroundMiddle,
-                        BackgroundBottom
-                    )
-                )
-            )
+            .background(Brush.verticalGradient(colors = backgrounds))
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val lilacCenter = Offset(size.width * 0.85f, size.height * 0.18f)
             val lilacRadius = size.minDimension * 0.65f
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(LilacGlow.copy(alpha = 0.55f), Color.Transparent),
+                    colors = listOf(lilac.copy(alpha = lilacAlpha), Color.Transparent),
                     center = lilacCenter,
                     radius = lilacRadius
                 ),
@@ -292,7 +303,7 @@ private fun GradientBackground(modifier: Modifier = Modifier) {
             val peachRadius = size.minDimension * 0.55f
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(PeachGlow.copy(alpha = 0.4f), Color.Transparent),
+                    colors = listOf(peach.copy(alpha = peachAlpha), Color.Transparent),
                     center = peachCenter,
                     radius = peachRadius
                 ),
@@ -308,6 +319,7 @@ private const val FLIP_FULL_TURNS = 4
 @Composable
 private fun CoinView(
     uiState: CoinFlipUiState,
+    isDarkMode: Boolean,
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(
@@ -351,20 +363,45 @@ private fun CoinView(
         val side = if (showCara) CoinSide.CARA else CoinSide.CRUZ
         val faceAngle = if (showCara) angle else angle + 180f
 
-        Image(
-            painter = painterResource(
-                if (side == CoinSide.CARA) R.drawable.coin_cara else R.drawable.coin_cruz
-            ),
-            contentDescription = stringResource(
-                if (side == CoinSide.CARA) R.string.cd_coin_cara else R.string.cd_coin_cruz
-            ),
-            modifier = Modifier
-                .size(coinSize)
-                .graphicsLayer {
-                    rotationY = faceAngle
-                    cameraDistance = 12f * density
-                }
-        )
+        Box(
+            modifier = Modifier.size(coinSize),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isDarkMode) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .drawBehind {
+                            drawCircle(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        DarkGlow.copy(alpha = 0.30f),
+                                        Color.Transparent
+                                    ),
+                                    center = center,
+                                    radius = size.minDimension * 0.85f
+                                ),
+                                radius = size.minDimension * 0.85f,
+                                center = center
+                            )
+                        }
+                )
+            }
+            Image(
+                painter = painterResource(
+                    if (side == CoinSide.CARA) R.drawable.coin_cara else R.drawable.coin_cruz
+                ),
+                contentDescription = stringResource(
+                    if (side == CoinSide.CARA) R.string.cd_coin_cara else R.string.cd_coin_cruz
+                ),
+                modifier = Modifier
+                    .size(coinSize)
+                    .graphicsLayer {
+                        rotationY = faceAngle
+                        cameraDistance = 12f * density
+                    }
+            )
+        }
     }
 }
 
@@ -433,11 +470,23 @@ private fun CoinFlipScreenSettingsPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun CoinFlipScreenSettingsDarkPreview() {
-    CaraOCruzTheme {
+    CaraOCruzTheme(darkTheme = true) {
         CoinFlipScreen(
             uiState = CoinFlipUiState.Result(CoinSide.CARA, 1),
             onFlipClick = {},
             showSettings = true,
+            isDarkMode = true
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CoinFlipScreenDarkPreview() {
+    CaraOCruzTheme(darkTheme = true) {
+        CoinFlipScreen(
+            uiState = CoinFlipUiState.Result(CoinSide.CRUZ, 1),
+            onFlipClick = {},
             isDarkMode = true
         )
     }
